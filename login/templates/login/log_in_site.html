@@ -1,1 +1,10 @@
-abc
+{% if error_message %}<p><strong>{{ error_message  }}</strong></p>{% endif %}
+
+<h2>LOGIN</h2>
+<form action="{% url 'login:submit' %}" method="post">
+{% csrf_token %}
+NID: <input type="text" name="nid" size=10 /><br />
+PASSWORD: <input type="password" name="passwd" size=20 /><br /><br />
+<input type="hidden" name="action" value="login" />
+<input type="submit" value="SUBMIT" />
+</form>

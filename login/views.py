@@ -18,15 +18,17 @@ def submit(request):
     for loginuser in LoginUser.objects.all():
         if loginuser.time<timezone.now()-datetime.timedelta(days=1):
             loginuser.delete()
+    print(nid_post, passwd_post)
     try:
         user = LoginUser.objects.get(nid=nid_post)
     except LoginUser.DoesNotExist:
-        return render(request, 'login/log_in_site.html', {'error_message': "This NID has already log in.",})
-    try:
-        user = User.objects.get(nid=nid_post, passwd=passwd_post)
-    except User.DoesNotExist:
-        return render(request, 'login/log_in_site.html', {'error_message': "Wrong NID or PASSWORD.",})
+        try:
+            user = User.objects.get(nid=nid_post, passwd=passwd_post)
+        except User.DoesNotExist:
+            return render(request, 'login/log_in_site.html', {'error_message': "Wrong NID or PASSWORD.",})
+        else:
+            loginuser = LoginUser(nid=nid_post, time=timezone.now())
+            loginuser.save()
+            return render(request, 'login/log_int_succeed.html')
     else:
-        loginuser = LoginUser(nid=nid_post, time=timezone.now())
-        loginuser.save()
-        return render(request, 'login/log_int_succeed.html')
+        return render(request, 'login/log_in_site.html', {'error_message': "This NID has already log in.",})
