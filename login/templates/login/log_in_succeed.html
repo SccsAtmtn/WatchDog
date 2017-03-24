@@ -1,1 +1,5 @@
-You have logged in successfully.
+user {{ nid }}: You have logged in successfully.
+<form action="{% url 'login:logout' %}" method="post">
+{% csrf_token %}
+<input type="submit" value="logout">
+</form>

@@ -7,4 +7,5 @@ app_name = 'login'
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^submit$', views.submit, name='submit'),
+    url(r'^logout$', views.logout, name='logout'),
 ]

@@ -6,4 +6,5 @@ class User(models.Model):
 
 class LoginUser(models.Model):
     nid = models.CharField(max_length=20)
+    lip = models.CharField(max_length=32)
     time = models.DateTimeField('Log in Time')
