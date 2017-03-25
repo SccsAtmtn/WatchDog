@@ -1,7 +1,7 @@
 {% if error_message %}<p><strong>{{ error_message  }}</strong></p>{% endif %}
 
 <h2>LOGIN</h2>
-<form action="{% url 'login:submit' %}" method="post">
+<form action="{% url 'login:index' %}" method="post">
 {% csrf_token %}
 NID: <input type="text" name="nid" size=10 /><br />
 PASSWORD: <input type="password" name="passwd" size=20 /><br /><br />
