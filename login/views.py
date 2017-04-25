@@ -32,24 +32,22 @@ def index(request):
             try:
                 user = LoginUser.objects.get(nid=nid_post)
             except LoginUser.DoesNotExist:
-                host = "1::1"
-                port = 9734
-                with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as s:
-                    s.connect((host, port))
-                    login_request = nid_post.encode("utf-8")
-                    if not (len(login_request)==10):
-                        return login_failure(request)
-                    login_request += b'\0'+passwd_post.encode("utf-8")
-                    if (len(login_request)>=32):
-                        return login_failure(request)
-                    while (len(login_request)<32):
-                        login_request += b'\0'
-                    login_request += socket.inet_pton(socket.AF_INET6, request.META["REMOTE_ADDR"])
-                    s.send(login_request)
-                    data = s.recv(1024)
-                    succeed = struct.unpack("<L", data[:4])[0]
-                    nid = data[4:15].decode('utf-8')
-                    lip = socket.inet_ntop(socket.AF_INET6, data[16:])
+                login_request = nid_post.encode("utf-8")
+                if not (len(login_request)==10):
+                    return login_failure(request)
+                login_request += b'\0'+passwd_post.encode("utf-8")
+                if (len(login_request)>=32):
+                    return login_failure(request)
+                while (len(login_request)<32):
+                    login_request += b'\0'
+                login_request += socket.inet_pton(socket.AF_INET6, request.META["REMOTE_ADDR"])
+                login_request = b'0'+login_request
+
+                data = ask_ip_generation(login_request, 1024)
+
+                succeed = struct.unpack("<L", data[:4])[0]
+                nid = data[4:15].decode('utf-8')
+                lip = socket.inet_ntop(socket.AF_INET6, data[16:])
                     
                 if not (succeed):
                     return login_failure(request)
@@ -61,12 +59,28 @@ def index(request):
             else:
                 return render(request, 'login/log_in_site.html', {'error_message': "This NID has already log in.",})
         else:
+            # log out
             ip = request.META['REMOTE_ADDR']
             for loginuser in LoginUser.objects.all():
                 if (loginuser.lip==ip):
+                    logout_request = loginuser.nid.encode("utf-8")+b"\0"
+                    logout_request += socket.inet_pton(socket.AF_INET6, ip) 
+                    logout_request = b'1'+logout_request
+                    fout = open("/home/sccsatmtn/test", "w")
+                    fout.write(ip)
+                    fout.close()
                     loginuser.delete()
+                    data = ask_ip_generation(logout_request, 1024) 
                     return render(request, 'login/log_in_site.html')
 
+def ask_ip_generation(message, recvLen):
+    host = "1::1"
+    port = 9734
+    with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as s:
+        s.connect((host, port))
+        s.send(message)
+        data = s.recv(recvLen)
+        return data
 
 def search_login_user(ip):
     for loginuser in LoginUser.objects.all():
