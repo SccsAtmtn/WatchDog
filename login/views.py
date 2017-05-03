@@ -52,8 +52,7 @@ def index(request):
                 if not (succeed):
                     return login_failure(request)
                 else:
-                    # TODO: lip should be changed to the generated ip
-                    loginuser = LoginUser(nid=nid_post, lip=request.META["REMOTE_ADDR"], time=timezone.now())
+                    loginuser = LoginUser(nid=nid_post, lip=lip, time=timezone.now())
                     loginuser.save()
                     return login_success(request, nid_post)
             else:
@@ -63,7 +62,7 @@ def index(request):
             ip = request.META['REMOTE_ADDR']
             for loginuser in LoginUser.objects.all():
                 if (loginuser.lip==ip):
-                    logout_request = loginuser.nid.encode("utf-8")+b"\0"
+                    logout_request = loginuser.nid.encode("utf-8")+b"\0\0"
                     logout_request += socket.inet_pton(socket.AF_INET6, ip) 
                     logout_request = b'1'+logout_request
                     fout = open("/home/sccsatmtn/test", "w")
